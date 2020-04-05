@@ -37,7 +37,7 @@ def Main():
     # reverse a port on your computer
     # in our case it is 12345 but it
     # can be anything
-    port = 21
+    port = 12345
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', port))
     print("socket binded to port", port)

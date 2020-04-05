@@ -2,40 +2,60 @@
 import socket
 
 
+users = []
+
+
+def read_users:
+
+
+def get_username():
+    inputs = list(map(str, input().split()))
+    print(inputs)
+
+
 def Main():
-	# local host IP '127.0.0.1'
-	host = '127.0.0.1'
+    # local host IP '127.0.0.1'
+    host = '127.0.0.1'
+    logged_in = False
 
-	# Define the port on which you want to connect
-	port = 12345
+    # Define the port on which you want to connect
+    port = 21
 
-	s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-	# connect to server on local computer
-	s.connect((host,port))
+    # connect to server on local computer
+    s.connect((host, port))
 
-	# message you send to server
-	message = "shaurya says geeksforgeeks"
-	while True:
+    # message you send to server
+    print("starting mail server")
 
-		# message sent to server
-		s.send(message.encode('ascii'))
+    message = "zhivar mohsen"
 
-		# messaga received from server
-		data = s.recv(1024)
+    while True:
 
-		# print the received message
-		# here it would be a reverse of sent message
-		print('Received from the server :',str(data.decode('ascii')))
+        if (not logged_in):
+            get_username()
 
-		# ask the client whether he wants to continue
-		ans = input('\nDo you want to continue(y/n) :')
-		if ans == 'y':
-			continue
-		else:
-			break
-	# close the connection
-	s.close()
+        # message sent to server
+        s.send(message.encode('ascii'))
+
+        # messaga received from server
+        data = s.recv(1024)
+
+        # print the received message
+        # here it would be a reverse of sent message
+        print('Received from the server :', str(data.decode('ascii')))
+
+        # ask the client whether he wants to continue
+        ans = input('\nDo you want to continue(y/n) :')
+
+        if ans == 'y':
+            continue
+        else:
+            break
+    # close the connection
+    s.close()
+
 
 if __name__ == '__main__':
-	Main()
+    Main()

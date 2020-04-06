@@ -17,6 +17,7 @@ LOGIN_OK = '230 User logged in, proceed.'
 NOT_AUTHORIZED = '332 Need account for login.'
 MAX_SIZE = 1024
 SYNTAX_ERROR = '501 Syntax error in parameters or arguments.'
+FILE_EXISTED = '500 File or directory already existed in this path.'
 
 
 # print_lock = threading.Lock()
@@ -42,7 +43,7 @@ def find_user(user_name):
 
 
 def threaded(c):
-    logged_in = False
+    logged_in = True
     user_username = None
     user = None
     while True:
@@ -67,6 +68,7 @@ def threaded(c):
                     continue
                 if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
                     c.send(SYNTAX_ERROR.encode())
+                    continue
                 input_username = parsed_data[1][1:len(parsed_data[1]) - 1]
                 user = find_user(input_username)
                 if not user:
@@ -81,6 +83,7 @@ def threaded(c):
                     continue
                 if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
                     c.send(SYNTAX_ERROR.encode())
+                    continue
                 input_password = parsed_data[1][1:len(parsed_data[1]) - 1]
                 if input_password != user['password']:
                     c.send(INVALID_USERNAME_PASSWORD.encode())
@@ -90,14 +93,45 @@ def threaded(c):
                 continue
         if(logged_in):
             if parsed_data[0] == 'PWD':
-                c.send(os.getcwd().encode())
+                c.send(('257 <' + os.getcwd() + '>').encode())
                 continue
+            if parsed_data[0] == 'MKD':
+                if len(parsed_data) == 2:
+                    if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
+                        c.send(SYNTAX_ERROR.encode())
+                        continue
+                    dir_name = parsed_data[1][1:len(parsed_data[1]) - 1]
+                    try:
+                        os.mkdir(dir_name)
+                        c.send(('257 <' + dir_name + '> created.').encode())
+                        continue
+                    except FileExistsError:
+                        c.send(FILE_EXISTED.encode())
+                        continue
+                elif len(parsed_data) == 3:
+                    if parsed_data[1] != '-i':
+                        print('1')
+                        c.send(SYNTAX_ERROR.encode())
+                        continue
+                    if parsed_data[2][0] != '<' or parsed_data[2][len(parsed_data[2]) - 1] != '>':
+                        print(2)
+                        c.send(SYNTAX_ERROR.encode())
+                        continue
+                    file_name = parsed_data[2][1:len(parsed_data[2]) - 1]
+                    try:
+                        open(file_name)
+                        c.send(FILE_EXISTED.encode())
+                        continue
+                    except FileNotFoundError:
+                        open(file_name, 'w+').close()
+                        c.send(('257 <' + file_name + '> created').encode())
+                        continue
 
-                # reverse the given string from client
+                        # reverse the given string from client
 
-                # send back reversed string to client
+                        # send back reversed string to client
 
-                # connection closed
+                        # connection closed
     c.close()
 
 

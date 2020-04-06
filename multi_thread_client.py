@@ -31,7 +31,10 @@ def Main():
 
             # message sent to server
 
-        s.send(data.encode())
+        if data == 'LIST':
+            s.send('LIST 65432'.encode())
+        else:
+            s.send(data.encode())
 
         parsed_data = list(map(str, data.split()))
         if parsed_data[0] == 'LIST':

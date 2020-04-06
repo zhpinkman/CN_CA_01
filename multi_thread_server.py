@@ -157,7 +157,7 @@ def threaded(c):
                     continue
             if parsed_data[0] == 'LIST':
                 data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                data_socket.connect(('', 65432))
+                data_socket.connect(('', int(parsed_data[1])))
                 data_socket.send(pickle.dumps(os.listdir()))
                 data_socket.close()
                 c.send(LIST_TRANSFER_DONE.encode())

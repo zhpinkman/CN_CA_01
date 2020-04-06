@@ -1,5 +1,6 @@
 # Import socket module
 import socket
+import pickle
 
 
 def Main():
@@ -9,7 +10,12 @@ def Main():
     # Define the port on which you want to connect
     port = 12345
 
+    data_port = 65432
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    data_socket.bind(('', data_port))
+    data_socket.listen(5)
 
     # connect to server on local computer
     s.connect((host, port))
@@ -23,9 +29,16 @@ def Main():
         if not data:
             break
 
-        # message sent to server
+            # message sent to server
 
         s.send(data.encode())
+
+        parsed_data = list(map(str, data.split()))
+        if parsed_data[0] == 'LIST':
+            server_socket, server_addr = data_socket.accept()
+            data_recvd = server_socket.recv(1024)
+            print(pickle.loads(data_recvd))
+            data_socket.close()
 
         # messaga received from server
         data = s.recv(1024)

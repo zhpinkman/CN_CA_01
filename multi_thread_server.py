@@ -3,6 +3,7 @@ import socket
 import json
 import os
 import shutil
+import pickle
 
 # import thread module
 from _thread import *
@@ -20,6 +21,7 @@ MAX_SIZE = 1024
 SYNTAX_ERROR = '501 Syntax error in parameters or arguments.'
 FILE_EXISTED = '500 File or directory already existed in this path.'
 FILE_NOT_EXISTED = '500 File or directory not existed in this path.'
+LIST_TRANSFER_DONE = '226 List transfer done.'
 
 
 # print_lock = threading.Lock()
@@ -153,6 +155,13 @@ def threaded(c):
                     shutil.rmtree(dir_name)
                     c.send(('257 <' + dir_name + '> deleted.').encode())
                     continue
+            if parsed_data[0] == 'LIST':
+                data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                data_socket.connect(('', 65432))
+                data_socket.send(pickle.dumps(os.listdir()))
+                data_socket.close()
+                c.send(LIST_TRANSFER_DONE.encode())
+                continue
 
     c.close()
 

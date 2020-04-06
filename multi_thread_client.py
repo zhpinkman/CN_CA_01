@@ -20,6 +20,8 @@ def Main():
     while True:
 
         data = input()
+        if not data:
+            break
 
         # message sent to server
 
@@ -30,15 +32,9 @@ def Main():
 
         # print the received message
         # here it would be a reverse of sent message
-        print('Received from the server :', str(data.decode('ascii')))
+        print(data.decode())
 
         # ask the client whether he wants to continue
-        ans = input('\nDo you want to continue(y/n) :')
-
-        if ans == 'y':
-            continue
-        else:
-            break
     # close the connection
     s.close()
 

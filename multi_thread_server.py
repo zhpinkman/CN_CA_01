@@ -1,6 +1,7 @@
 # import socket programming library
 import socket
 import json
+import os
 
 # import thread module
 from _thread import *
@@ -88,14 +89,15 @@ def threaded(c):
                 logged_in = True
                 continue
         if(logged_in):
-            c.send('user is logged in'.encode())
-            continue
+            if parsed_data[0] == 'PWD':
+                c.send(os.getcwd().encode())
+                continue
 
-            # reverse the given string from client
+                # reverse the given string from client
 
-            # send back reversed string to client
+                # send back reversed string to client
 
-    # connection closed
+                # connection closed
     c.close()
 
 

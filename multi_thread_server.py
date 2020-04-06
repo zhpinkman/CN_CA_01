@@ -174,7 +174,11 @@ def threaded(c):
             if parsed_data[0] == 'LIST':
                 data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 data_socket.connect(('', int(parsed_data[1])))
-                data_socket.send(pickle.dumps(os.listdir()))
+                diff_path = get_diff_path(base_dir, curr_dir)
+                if not diff_path:
+                    data_socket.send(pickle.dumps(os.listdir()))
+                else:
+                    data_socket.send(pickle.dumps(os.listdir(diff_path)))
                 data_socket.close()
                 c.send(LIST_TRANSFER_DONE.encode())
                 continue

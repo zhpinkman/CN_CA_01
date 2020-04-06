@@ -33,15 +33,13 @@ def Main():
 
         if data == 'LIST':
             s.send('LIST 65432'.encode())
-        else:
-            s.send(data.encode())
-
-        parsed_data = list(map(str, data.split()))
-        if parsed_data[0] == 'LIST':
             server_socket, server_addr = data_socket.accept()
             data_recvd = server_socket.recv(1024)
             print(pickle.loads(data_recvd))
-            data_socket.close()
+            server_socket.close()
+
+        else:
+            s.send(data.encode())
 
         # messaga received from server
         data = s.recv(1024)

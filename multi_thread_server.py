@@ -2,6 +2,7 @@
 import socket
 import json
 import os
+import shutil
 
 # import thread module
 from _thread import *
@@ -18,6 +19,7 @@ NOT_AUTHORIZED = '332 Need account for login.'
 MAX_SIZE = 1024
 SYNTAX_ERROR = '501 Syntax error in parameters or arguments.'
 FILE_EXISTED = '500 File or directory already existed in this path.'
+FILE_NOT_EXISTED = '500 File or directory not existed in this path.'
 
 
 # print_lock = threading.Lock()
@@ -101,13 +103,13 @@ def threaded(c):
                         c.send(SYNTAX_ERROR.encode())
                         continue
                     dir_name = parsed_data[1][1:len(parsed_data[1]) - 1]
-                    try:
-                        os.mkdir(dir_name)
-                        c.send(('257 <' + dir_name + '> created.').encode())
-                        continue
-                    except FileExistsError:
+                    if os.path.exists(dir_name):
                         c.send(FILE_EXISTED.encode())
                         continue
+                    os.mkdir(dir_name)
+                    c.send(('257 <' + dir_name + '> created.').encode())
+                    continue
+
                 elif len(parsed_data) == 3:
                     if parsed_data[1] != '-i':
                         print('1')
@@ -118,20 +120,40 @@ def threaded(c):
                         c.send(SYNTAX_ERROR.encode())
                         continue
                     file_name = parsed_data[2][1:len(parsed_data[2]) - 1]
-                    try:
-                        open(file_name)
+                    if os.path.exists(file_name):
                         c.send(FILE_EXISTED.encode())
                         continue
-                    except FileNotFoundError:
-                        open(file_name, 'w+').close()
-                        c.send(('257 <' + file_name + '> created').encode())
+                    open(file_name, 'w+').close()
+                    c.send(('257 <' + file_name + '> created.').encode())
+                    continue
+            if parsed_data[0] == 'RMD':
+                if len(parsed_data) == 2:
+                    if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
+                        c.send(SYNTAX_ERROR.encode())
                         continue
+                    file_name = parsed_data[1][1:len(parsed_data[1]) - 1]
+                    if not os.path.exists(file_name):
+                        c.send(FILE_NOT_EXISTED.encode())
+                        continue
+                    os.remove(file_name)
+                    c.send(('257 <' + file_name + '> deleted.').encode())
+                    continue
 
-                        # reverse the given string from client
+                elif len(parsed_data) == 3:
+                    if parsed_data[1] != '-f':
+                        c.send(SYNTAX_ERROR.encode())
+                        continue
+                    if parsed_data[2][0] != '<' or parsed_data[2][len(parsed_data[2]) - 1] != '>':
+                        c.send(SYNTAX_ERROR.encode())
+                        continue
+                    dir_name = parsed_data[2][1:len(parsed_data[2]) - 1]
+                    if not os.path.exists(dir_name):
+                        c.send(FILE_NOT_EXISTED.encode())
+                        continue
+                    shutil.rmtree(dir_name)
+                    c.send(('257 <' + dir_name + '> deleted.').encode())
+                    continue
 
-                        # send back reversed string to client
-
-                        # connection closed
     c.close()
 
 

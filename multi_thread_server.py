@@ -21,12 +21,26 @@ MAX_SIZE = 1024
 SYNTAX_ERROR = '501 Syntax error in parameters or arguments.'
 FILE_EXISTED = '500 File or directory already existed in this path.'
 FILE_NOT_EXISTED = '500 File or directory not existed in this path.'
+NOT_DIRECTOR = '500 Not a directory.'
 LIST_TRANSFER_DONE = '226 List transfer done.'
+CWD_SUCCESS = '250 Successful Change.'
 
 
 # print_lock = threading.Lock()
 
 # thread function
+
+def get_diff_path(base_dir, curr_dir):
+    base_dir_list = base_dir.split('/')
+    curr_dir_list = curr_dir.split('/')
+    result_dir_list = []
+    for path in curr_dir_list:
+        if path not in base_dir_list:
+            result_dir_list.append(path)
+    result_dir = '/'.join(result_dir_list)
+    if result_dir:
+        return result_dir + '/'
+    return result_dir
 
 
 def read_config_file():
@@ -47,6 +61,8 @@ def find_user(user_name):
 
 
 def threaded(c):
+    base_dir = os.getcwd()
+    curr_dir = base_dir
     logged_in = True
     user_username = None
     user = None
@@ -97,7 +113,7 @@ def threaded(c):
                 continue
         if(logged_in):
             if parsed_data[0] == 'PWD':
-                c.send(('257 <' + os.getcwd() + '>').encode())
+                c.send(('257 <' + curr_dir + '>').encode())
                 continue
             if parsed_data[0] == 'MKD':
                 if len(parsed_data) == 2:
@@ -162,6 +178,32 @@ def threaded(c):
                 data_socket.close()
                 c.send(LIST_TRANSFER_DONE.encode())
                 continue
+            if parsed_data[0] == 'CWD':
+                if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
+                    c.send(SYNTAX_ERROR.encode())
+                    continue
+                target_dir = parsed_data[1][1:len(parsed_data[1]) - 1]
+                if not target_dir:
+                    curr_dir = base_dir
+                    c.send(CWD_SUCCESS.encode())
+                    continue
+                elif target_dir == '..':
+                    if base_dir != curr_dir:
+                        curr_dir_list = curr_dir.split('/')
+                        curr_dir_list.pop()
+                        curr_dir = '/'.join(curr_dir_list)
+                    c.send(CWD_SUCCESS.encode())
+                    continue
+                else:
+                    diff_path = get_diff_path(base_dir, curr_dir)
+                    print(diff_path + target_dir)
+                    if os.path.isdir(diff_path + target_dir):
+                        curr_dir += '/' + target_dir
+                        c.send(CWD_SUCCESS.encode())
+                        continue
+                    else:
+                        c.send(NOT_DIRECTOR.encode())
+                        continue
 
     c.close()
 

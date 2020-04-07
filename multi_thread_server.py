@@ -138,6 +138,36 @@ class Client_handler:
         elif len(args) == 3 and self.validate_create_file_option(args[1]):
             self.make_file(args[2])
 
+    def check_for_not_existing_file_or_dir(self, name):
+        if not os.path.exists(self.get_base_path() + name):
+            raise Error(FILE_NOT_EXISTED)
+
+    def remove_file(self, arg):
+        self.validate_arg(arg)
+        file_name = self.get_neat_data(arg)
+        self.check_for_not_existing_file_or_dir(file_name)
+        os.remove(self.get_base_path() + file_name)
+        self.send_message('257 <' + file_name + '> deleted.')
+
+    def validate_remove_dir_option(self, option):
+        if option != '-f':
+            raise Error(SYNTAX_ERROR)
+        return True
+
+    def remove_dir(self, arg):
+        self.validate_arg(arg)
+        dir_name = self.get_neat_data(arg)
+        self.check_for_not_existing_file_or_dir(dir_name)
+        shutil.rmtree(self.get_base_path() + dir_name)
+        self.send_message('257 <' + dir_name + '> deleted.')
+
+    def handle_RMD_command(self, args):
+        self.authenticate_user()
+        if len(args) == 2:
+            self.remove_file(args[1])
+        elif len(args) == 3 and self.validate_remove_dir_option(args[1]):
+            self.remove_dir(args[2])
+
 
 class Utils:
     def get_diff_path(self, base_dir, curr_dir):
@@ -197,41 +227,13 @@ def threaded(client_handler):
                 client_handler.handle_PWD_command()
             elif command == 'MKD':
                 client_handler.handle_MKD_command(parsed_data)
+            elif command == 'RMD':
+                client_handler.handle_RMD_command(parsed_data)
 
         except Error as e:
             client_handler.send_message(e.message)
             continue
 
-        # if(logged_in):
-        #     if parsed_data[0] == 'MKD':
-        #         if len(parsed_data) == 2:
-        #             if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
-        #                 c.send(SYNTAX_ERROR.encode())
-        #                 continue
-        #             dir_name = parsed_data[1][1:len(parsed_data[1]) - 1]
-        #             if os.path.exists(dir_name):
-        #                 c.send(FILE_EXISTED.encode())
-        #                 continue
-        #             os.mkdir(dir_name)
-        #             c.send(('257 <' + dir_name + '> created.').encode())
-        #             continue
-
-        #         elif len(parsed_data) == 3:
-        #             if parsed_data[1] != '-i':
-        #                 print('1')
-        #                 c.send(SYNTAX_ERROR.encode())
-        #                 continue
-        #             if parsed_data[2][0] != '<' or parsed_data[2][len(parsed_data[2]) - 1] != '>':
-        #                 print(2)
-        #                 c.send(SYNTAX_ERROR.encode())
-        #                 continue
-        #             file_name = parsed_data[2][1:len(parsed_data[2]) - 1]
-        #             if os.path.exists(file_name):
-        #                 c.send(FILE_EXISTED.encode())
-        #                 continue
-        #             open(file_name, 'w+').close()
-        #             c.send(('257 <' + file_name + '> created.').encode())
-        #             continue
         #     if parsed_data[0] == 'RMD':
         #         if len(parsed_data) == 2:
         #             if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':

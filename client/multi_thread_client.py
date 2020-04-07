@@ -3,7 +3,7 @@ import socket
 import pickle
 
 
-def Main():
+def main():
     # local host IP '127.0.0.1'
     host = '127.0.0.1'
 
@@ -54,4 +54,4 @@ def Main():
 
 
 if __name__ == '__main__':
-    Main()
+    main()

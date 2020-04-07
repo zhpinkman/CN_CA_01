@@ -196,26 +196,35 @@ class Client_handler:
         self.close_data_connection()
         self.send_message(LIST_TRANSFER_DONE)
 
+    def go_to_prev_path(self):
+        if self.base_dir != self.curr_dir:
+            curr_dir_list = self.curr_dir.split('/')
+            curr_dir_list.pop()
+            self.curr_dir = '/'.join(curr_dir_list)
+        self.send_message(CWD_SUCCESS)
+
+    def go_to_path(self, target_dir):
+        diff_path = self.get_base_path()
+        if os.path.isdir(diff_path + target_dir):
+            self.curr_dir += '/' + target_dir
+            self.send_message(CWD_SUCCESS)
+        else:
+            self.send_message(NOT_DIRECTORY)
+
+    def go_to_base_path(self):
+        self.curr_dir = self.base_dir
+        self.send_message(CWD_SUCCESS)
+
     def handle_CWD_command(self, args):
         self.authenticate_user()
         self.validate_arg(args[1])
         target_dir = self.get_neat_data(args[1])
         if not target_dir:
-            self.curr_dir = self.base_dir
-            self.send_message(CWD_SUCCESS)
+            self.go_to_base_path()
         elif target_dir == '..':
-            if self.base_dir != self.curr_dir:
-                curr_dir_list = self.curr_dir.split('/')
-                curr_dir_list.pop()
-                self.curr_dir = '/'.join(curr_dir_list)
-            self.send_message(CWD_SUCCESS)
+            self.go_to_prev_path()
         else:
-            diff_path = self.get_base_path()
-            if os.path.isdir(diff_path + target_dir):
-                self.curr_dir += '/' + target_dir
-                self.send_message(CWD_SUCCESS)
-            else:
-                self.send_message(NOT_DIRECTORY)
+            self.go_to_path(target_dir)
 
 
 class Utils:

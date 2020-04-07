@@ -31,6 +31,7 @@ SYNTAX_ERROR = '501 Syntax error in parameters or arguments.'
 FILE_EXISTED = '500 File or directory already existed in this path.'
 FILE_NOT_EXISTED = '500 File or directory not existed in this path.'
 NOT_DIRECTORY = '500 Not a directory.'
+UNKNOWN_COMMAND = '500 Unknown command.'
 LIST_TRANSFER_DONE = '226 List transfer done.'
 CWD_SUCCESS = '250 Successful Change.'
 
@@ -141,7 +142,6 @@ class Client_handler:
     def initiate_data_connection(self, data_port):
         self.data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_socket.connect(('', data_port))
-        print(11)
 
     def close_data_connection(self):
         self.data_socket.close()
@@ -176,6 +176,7 @@ class Client_handler:
 
 
 # public methods
+
 
     def handle_USER_command(self, arg):
         self.check_for_previous_username()
@@ -296,6 +297,8 @@ def threaded(client_handler):
                 client_handler.handle_LIST_command(parsed_data)
             elif command == 'CWD':
                 client_handler.handle_CWD_command(parsed_data)
+            else:
+                raise Error(UNKNOWN_COMMAND)
 
         except Error as e:
             client_handler.send_message(e.message)

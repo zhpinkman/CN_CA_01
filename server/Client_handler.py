@@ -108,7 +108,8 @@ class Client_handler:
 
     def initiate_data_connection(self, data_port):
         self.data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.data_socket.connect(('', data_port))
+        print(data_port)
+        self.data_socket.connect(('127.0.0.1', data_port))
 
     def close_data_connection(self):
         self.data_socket.close()

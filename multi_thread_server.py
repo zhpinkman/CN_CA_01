@@ -47,6 +47,7 @@ class Client_handler:
         self.username = None
         self.user = None
         self.client = client
+        self.data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def validate_arg(self, arg):
         if arg[0] != '<' or arg[len(arg) - 1] != '>':
@@ -168,6 +169,31 @@ class Client_handler:
         elif len(args) == 3 and self.validate_remove_dir_option(args[1]):
             self.remove_dir(args[2])
 
+    def initiate_data_connection(self, data_port):
+        self.data_socket.connect(('', data_port))
+
+    def close_data_connection(self):
+        self.data_socket.close()
+
+    def get_file_list(self, base_path):
+        if not base_path:
+            return pickle.dumps(os.listdir())
+        else:
+            return pickle.dumps(os.listdir(base_path))
+
+    def send_data(self, data):
+        self.data_socket.send(data)
+
+    def handle_LIST_command(self, args):
+        self.authenticate_user()
+        client_data_port = int(args[1])
+        self.initiate_data_connection(client_data_port)
+        base_path = self.get_base_path()
+        file_list = self.get_file_list(base_path)
+        self.send_data(file_list)
+        self.close_data_connection()
+        self.send_message(LIST_TRANSFER_DONE)
+
 
 class Utils:
     def get_diff_path(self, base_dir, curr_dir):
@@ -220,7 +246,6 @@ def threaded(client_handler):
         try:
             if command == 'USER':
                 client_handler.handle_USER_command(parsed_data)
-                continue
             elif command == 'PASS':
                 client_handler.handle_PASS_command(parsed_data)
             elif command == 'PWD':
@@ -229,38 +254,12 @@ def threaded(client_handler):
                 client_handler.handle_MKD_command(parsed_data)
             elif command == 'RMD':
                 client_handler.handle_RMD_command(parsed_data)
+            elif command == 'LIST':
+                client_handler.handle_LIST_command(parsed_data)
 
         except Error as e:
             client_handler.send_message(e.message)
-            continue
 
-        #     if parsed_data[0] == 'RMD':
-        #         if len(parsed_data) == 2:
-        #             if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
-        #                 c.send(SYNTAX_ERROR.encode())
-        #                 continue
-        #             file_name = parsed_data[1][1:len(parsed_data[1]) - 1]
-        #             if not os.path.exists(file_name):
-        #                 c.send(FILE_NOT_EXISTED.encode())
-        #                 continue
-        #             os.remove(file_name)
-        #             c.send(('257 <' + file_name + '> deleted.').encode())
-        #             continue
-
-        #         elif len(parsed_data) == 3:
-        #             if parsed_data[1] != '-f':
-        #                 c.send(SYNTAX_ERROR.encode())
-        #                 continue
-        #             if parsed_data[2][0] != '<' or parsed_data[2][len(parsed_data[2]) - 1] != '>':
-        #                 c.send(SYNTAX_ERROR.encode())
-        #                 continue
-        #             dir_name = parsed_data[2][1:len(parsed_data[2]) - 1]
-        #             if not os.path.exists(dir_name):
-        #                 c.send(FILE_NOT_EXISTED.encode())
-        #                 continue
-        #             shutil.rmtree(dir_name)
-        #             c.send(('257 <' + dir_name + '> deleted.').encode())
-        #             continue
         #     if parsed_data[0] == 'LIST':
         #         data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #         data_socket.connect(('', int(parsed_data[1])))

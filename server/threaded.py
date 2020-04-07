@@ -33,6 +33,8 @@ def threaded(client_handler):
                 client_handler.handle_LIST_command(parsed_data)
             elif command == 'CWD':
                 client_handler.handle_CWD_command(parsed_data)
+            elif command == 'QUIT':
+                client_handler.handle_QUIT_command()
             else:
                 raise Error(UNKNOWN_COMMAND)
 

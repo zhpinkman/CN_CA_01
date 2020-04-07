@@ -1,6 +1,8 @@
 # Import socket module
 import socket
 import pickle
+import sys
+import select
 
 
 def main():
@@ -12,45 +14,50 @@ def main():
 
     data_port = 65432
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    command_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    socket_lists = [sys.stdin, command_socket, data_socket]
+
     data_socket.bind(('', data_port))
     data_socket.listen(5)
 
     # connect to server on local computer
-    s.connect((host, port))
+    command_socket.connect((host, port))
 
     # message you send to server
     print("starting mail server")
 
     while True:
 
-        data = input()
-        if not data:
-            break
+        read_sockets, write_sockets, error_sockets = select.select(socket_lists, [], [])
 
-            # message sent to server
+        for sock in read_sockets:
+            if sock is sys.stdin:
+                data = sys.stdin.readline()
+                if not data:
+                    command_socket.close()
+                    data_socket.close()
+                    return
+                elif data == 'LIST\n':
+                    command_socket.send('LIST 65432'.encode())
+                else:
+                    command_socket.send(data.encode())
+            elif sock is command_socket:
+                data = sock.recv(1024)
+                print(data.decode())
+            elif sock is data_socket:
+                server_socket, server_addr = sock.accept()
+                socket_lists.append(server_socket)
+            else:
+                data_recvd = sock.recv(1024)
+                print(pickle.loads(data_recvd))
+                socket_lists.remove(sock)
+                sock.close()
 
-        if data == 'LIST':
-            s.send('LIST 65432'.encode())
-            server_socket, server_addr = data_socket.accept()
-            data_recvd = server_socket.recv(1024)
-            print(pickle.loads(data_recvd))
-            server_socket.close()
 
-        else:
-            s.send(data.encode())
-
-        # messaga received from server
-        data = s.recv(1024)
-
-        # print the received message
-        # here it would be a reverse of sent message
-        print(data.decode())
-
-        # ask the client whether he wants to continue
     # close the connection
-    s.close()
+    command_socket.close()
 
 
 if __name__ == '__main__':

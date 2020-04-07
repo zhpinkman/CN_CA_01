@@ -41,7 +41,7 @@ CWD_SUCCESS = '250 Successful Change.'
 
 class Client_handler:
     def __init__(self, client):
-        self.base_dir = os.getcwd
+        self.base_dir = os.getcwd()
         self.curr_dir = self.base_dir
         self.logged_in = True
         self.username = None
@@ -74,7 +74,7 @@ class Client_handler:
         self.client.close()
 
     def check_for_existing_username(self):
-        if not self.username or self.logged_in:
+        if (not self.username) or self.logged_in:
             raise Error(BAD_SEQUENCE_OF_COMMANDS)
 
     def handle_USER_command(self, arg):
@@ -96,6 +96,47 @@ class Client_handler:
         self.validate_password(password)
         self.logged_in = True
         self.send_message(LOGIN_OK)
+
+    def authenticate_user(self):
+        if not self.logged_in:
+            raise Error(NOT_AUTHORIZED)
+
+    def handle_PWD_command(self):
+        self.authenticate_user()
+        self.send_message('257 <' + self.curr_dir + '>')
+
+    def get_base_path(self):
+        return Utils().get_diff_path(self.base_dir, self.curr_dir)
+
+    def check_for_existing_file_or_dir(self, name):
+        if os.path.exists(self.get_base_path() + name):
+            raise Error(FILE_EXISTED)
+
+    def make_dir(self, arg):
+        self.validate_arg(arg)
+        dir_name = self.get_neat_data(arg)
+        self.check_for_existing_file_or_dir(dir_name)
+        os.mkdir(self.get_base_path() + dir_name)
+        self.send_message('257 <' + dir_name + '> created.')
+
+    def validate_create_file_option(self, option):
+        if option != '-i':
+            raise Error(SYNTAX_ERROR)
+        return True
+
+    def make_file(self, arg):
+        self.validate_arg(arg)
+        file_name = self.get_neat_data(arg)
+        self.check_for_existing_file_or_dir(file_name)
+        open(self.get_base_path() + file_name, 'w+').close()
+        self.send_message('257 <' + file_name + '> created.')
+
+    def handle_MKD_command(self, args):
+        self.authenticate_user()
+        if len(args) == 2:
+            self.make_dir(args[1])
+        elif len(args) == 3 and self.validate_create_file_option(args[1]):
+            self.make_file(args[2])
 
 
 class Utils:
@@ -152,48 +193,16 @@ def threaded(client_handler):
                 continue
             elif command == 'PASS':
                 client_handler.handle_PASS_command(parsed_data)
+            elif command == 'PWD':
+                client_handler.handle_PWD_command()
+            elif command == 'MKD':
+                client_handler.handle_MKD_command(parsed_data)
 
         except Error as e:
             client_handler.send_message(e.message)
             continue
 
-        # # if (not logged_in) and (parsed_data[0] not in ['USER', 'PASS']):
-        # #     c.send(NOT_AUTHORIZED.encode())
-        # #     continue
-        # # if (not logged_in) and (parsed_data[0] in ['USER', 'PASS']):
-        # #     if not user_username:
-        # #         if parsed_data[0] != 'USER':
-        # #             c.send(BAD_SEQUENCE_OF_COMMANDS.encode())
-        # #             continue
-        # #         if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
-        # #             c.send(SYNTAX_ERROR.encode())
-        # #             continue
-        # #         input_username = parsed_data[1][1:len(parsed_data[1]) - 1]
-        # #         user = find_user(input_username)
-        # #         if not user:
-        # #             c.send(INVALID_USERNAME_PASSWORD.encode())
-        # #             continue
-        # #         user_username = user['user']
-        # #         c.send(USERNAME_OK.encode())
-        # #         continue
-        # #     else:
-        # #         if parsed_data[0] != 'PASS':
-        # #             c.send(BAD_SEQUENCE_OF_COMMANDS.encode())
-        # #             continue
-        # #         if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
-        # #             c.send(SYNTAX_ERROR.encode())
-        # #             continue
-        # #         input_password = parsed_data[1][1:len(parsed_data[1]) - 1]
-        # #         if input_password != user['password']:
-        # #             c.send(INVALID_USERNAME_PASSWORD.encode())
-        # #             continue
-        # #         c.send(LOGIN_OK.encode())
-        # #         logged_in = True
-        # #         continue
         # if(logged_in):
-        #     if parsed_data[0] == 'PWD':
-        #         c.send(('257 <' + curr_dir + '>').encode())
-        #         continue
         #     if parsed_data[0] == 'MKD':
         #         if len(parsed_data) == 2:
         #             if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':

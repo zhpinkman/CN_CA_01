@@ -30,7 +30,7 @@ MAX_SIZE = 1024
 SYNTAX_ERROR = '501 Syntax error in parameters or arguments.'
 FILE_EXISTED = '500 File or directory already existed in this path.'
 FILE_NOT_EXISTED = '500 File or directory not existed in this path.'
-NOT_DIRECTOR = '500 Not a directory.'
+NOT_DIRECTORY = '500 Not a directory.'
 LIST_TRANSFER_DONE = '226 List transfer done.'
 CWD_SUCCESS = '250 Successful Change.'
 
@@ -47,7 +47,7 @@ class Client_handler:
         self.username = None
         self.user = None
         self.client = client
-        self.data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.data_socket = None
 
     def validate_arg(self, arg):
         if arg[0] != '<' or arg[len(arg) - 1] != '>':
@@ -170,7 +170,9 @@ class Client_handler:
             self.remove_dir(args[2])
 
     def initiate_data_connection(self, data_port):
+        self.data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_socket.connect(('', data_port))
+        print(11)
 
     def close_data_connection(self):
         self.data_socket.close()
@@ -193,6 +195,27 @@ class Client_handler:
         self.send_data(file_list)
         self.close_data_connection()
         self.send_message(LIST_TRANSFER_DONE)
+
+    def handle_CWD_command(self, args):
+        self.authenticate_user()
+        self.validate_arg(args[1])
+        target_dir = self.get_neat_data(args[1])
+        if not target_dir:
+            self.curr_dir = self.base_dir
+            self.send_message(CWD_SUCCESS)
+        elif target_dir == '..':
+            if self.base_dir != self.curr_dir:
+                curr_dir_list = self.curr_dir.split('/')
+                curr_dir_list.pop()
+                self.curr_dir = '/'.join(curr_dir_list)
+            self.send_message(CWD_SUCCESS)
+        else:
+            diff_path = self.get_base_path()
+            if os.path.isdir(diff_path + target_dir):
+                self.curr_dir += '/' + target_dir
+                self.send_message(CWD_SUCCESS)
+            else:
+                self.send_message(NOT_DIRECTORY)
 
 
 class Utils:
@@ -256,47 +279,11 @@ def threaded(client_handler):
                 client_handler.handle_RMD_command(parsed_data)
             elif command == 'LIST':
                 client_handler.handle_LIST_command(parsed_data)
+            elif command == 'CWD':
+                client_handler.handle_CWD_command(parsed_data)
 
         except Error as e:
             client_handler.send_message(e.message)
-
-        #     if parsed_data[0] == 'LIST':
-        #         data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #         data_socket.connect(('', int(parsed_data[1])))
-        #         diff_path = get_diff_path(base_dir, curr_dir)
-        #         if not diff_path:
-        #             data_socket.send(pickle.dumps(os.listdir()))
-        #         else:
-        #             data_socket.send(pickle.dumps(os.listdir(diff_path)))
-        #         data_socket.close()
-        #         c.send(LIST_TRANSFER_DONE.encode())
-        #         continue
-        #     if parsed_data[0] == 'CWD':
-        #         if parsed_data[1][0] != '<' or parsed_data[1][len(parsed_data[1]) - 1] != '>':
-        #             c.send(SYNTAX_ERROR.encode())
-        #             continue
-        #         target_dir = parsed_data[1][1:len(parsed_data[1]) - 1]
-        #         if not target_dir:
-        #             curr_dir = base_dir
-        #             c.send(CWD_SUCCESS.encode())
-        #             continue
-        #         elif target_dir == '..':
-        #             if base_dir != curr_dir:
-        #                 curr_dir_list = curr_dir.split('/')
-        #                 curr_dir_list.pop()
-        #                 curr_dir = '/'.join(curr_dir_list)
-        #             c.send(CWD_SUCCESS.encode())
-        #             continue
-        #         else:
-        #             diff_path = get_diff_path(base_dir, curr_dir)
-        #             print(diff_path + target_dir)
-        #             if os.path.isdir(diff_path + target_dir):
-        #                 curr_dir += '/' + target_dir
-        #                 c.send(CWD_SUCCESS.encode())
-        #                 continue
-        #             else:
-        #                 c.send(NOT_DIRECTOR.encode())
-        #                 continue
 
     client_handler.close_connection()
 

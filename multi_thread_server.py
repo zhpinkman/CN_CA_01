@@ -40,6 +40,9 @@ CWD_SUCCESS = '250 Successful Change.'
 # thread function
 
 class Client_handler:
+
+    # private methods
+
     def __init__(self, client):
         self.base_dir = os.getcwd()
         self.curr_dir = self.base_dir
@@ -78,33 +81,13 @@ class Client_handler:
         if (not self.username) or self.logged_in:
             raise Error(BAD_SEQUENCE_OF_COMMANDS)
 
-    def handle_USER_command(self, arg):
-        self.check_for_previous_username()
-        self.validate_arg(arg[1])
-        username = self.get_neat_data(arg[1])
-        self.user = Utils().find_user(username)
-        self.username = self.user['user']
-        self.send_message(USERNAME_OK)
-
     def validate_password(self, password):
         if password != self.user['password']:
             raise Error(INVALID_USERNAME_PASSWORD)
 
-    def handle_PASS_command(self, arg):
-        self.check_for_existing_username()
-        self.validate_arg(arg[1])
-        password = self.get_neat_data(arg[1])
-        self.validate_password(password)
-        self.logged_in = True
-        self.send_message(LOGIN_OK)
-
     def authenticate_user(self):
         if not self.logged_in:
             raise Error(NOT_AUTHORIZED)
-
-    def handle_PWD_command(self):
-        self.authenticate_user()
-        self.send_message('257 <' + self.curr_dir + '>')
 
     def get_base_path(self):
         return Utils().get_diff_path(self.base_dir, self.curr_dir)
@@ -132,13 +115,6 @@ class Client_handler:
         open(self.get_base_path() + file_name, 'w+').close()
         self.send_message('257 <' + file_name + '> created.')
 
-    def handle_MKD_command(self, args):
-        self.authenticate_user()
-        if len(args) == 2:
-            self.make_dir(args[1])
-        elif len(args) == 3 and self.validate_create_file_option(args[1]):
-            self.make_file(args[2])
-
     def check_for_not_existing_file_or_dir(self, name):
         if not os.path.exists(self.get_base_path() + name):
             raise Error(FILE_NOT_EXISTED)
@@ -162,13 +138,6 @@ class Client_handler:
         shutil.rmtree(self.get_base_path() + dir_name)
         self.send_message('257 <' + dir_name + '> deleted.')
 
-    def handle_RMD_command(self, args):
-        self.authenticate_user()
-        if len(args) == 2:
-            self.remove_file(args[1])
-        elif len(args) == 3 and self.validate_remove_dir_option(args[1]):
-            self.remove_dir(args[2])
-
     def initiate_data_connection(self, data_port):
         self.data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_socket.connect(('', data_port))
@@ -185,16 +154,6 @@ class Client_handler:
 
     def send_data(self, data):
         self.data_socket.send(data)
-
-    def handle_LIST_command(self, args):
-        self.authenticate_user()
-        client_data_port = int(args[1])
-        self.initiate_data_connection(client_data_port)
-        base_path = self.get_base_path()
-        file_list = self.get_file_list(base_path)
-        self.send_data(file_list)
-        self.close_data_connection()
-        self.send_message(LIST_TRANSFER_DONE)
 
     def go_to_prev_path(self):
         if self.base_dir != self.curr_dir:
@@ -214,6 +173,53 @@ class Client_handler:
     def go_to_base_path(self):
         self.curr_dir = self.base_dir
         self.send_message(CWD_SUCCESS)
+
+
+# public methods
+
+    def handle_USER_command(self, arg):
+        self.check_for_previous_username()
+        self.validate_arg(arg[1])
+        username = self.get_neat_data(arg[1])
+        self.user = Utils().find_user(username)
+        self.username = self.user['user']
+        self.send_message(USERNAME_OK)
+
+    def handle_PASS_command(self, arg):
+        self.check_for_existing_username()
+        self.validate_arg(arg[1])
+        password = self.get_neat_data(arg[1])
+        self.validate_password(password)
+        self.logged_in = True
+        self.send_message(LOGIN_OK)
+
+    def handle_PWD_command(self):
+        self.authenticate_user()
+        self.send_message('257 <' + self.curr_dir + '>')
+
+    def handle_MKD_command(self, args):
+        self.authenticate_user()
+        if len(args) == 2:
+            self.make_dir(args[1])
+        elif len(args) == 3 and self.validate_create_file_option(args[1]):
+            self.make_file(args[2])
+
+    def handle_RMD_command(self, args):
+        self.authenticate_user()
+        if len(args) == 2:
+            self.remove_file(args[1])
+        elif len(args) == 3 and self.validate_remove_dir_option(args[1]):
+            self.remove_dir(args[2])
+
+    def handle_LIST_command(self, args):
+        self.authenticate_user()
+        client_data_port = int(args[1])
+        self.initiate_data_connection(client_data_port)
+        base_path = self.get_base_path()
+        file_list = self.get_file_list(base_path)
+        self.send_data(file_list)
+        self.close_data_connection()
+        self.send_message(LIST_TRANSFER_DONE)
 
     def handle_CWD_command(self, args):
         self.authenticate_user()

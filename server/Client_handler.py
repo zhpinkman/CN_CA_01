@@ -1,7 +1,7 @@
 import socket
 import os
 import shutil
-import pickle
+from File_handler import File_handler
 from defines import *
 from Utils import Utils
 from Error import Error
@@ -120,12 +120,6 @@ class Client_handler:
     def close_data_connection(self):
         self.data_socket.close()
 
-    def get_file_list(self, base_path):
-        if not base_path:
-            return pickle.dumps(os.listdir())
-        else:
-            return pickle.dumps(os.listdir(base_path))
-
     def send_data(self, data):
         self.data_socket.send(data)
 
@@ -189,16 +183,18 @@ class Client_handler:
         client_data_port = int(args[1])
         self.initiate_data_connection(client_data_port)
         base_path = self.get_base_path()
-        file_list = self.get_file_list(base_path)
+        file_list = File_handler.get_directory_files_list(base_path)
         self.send_data(file_list)
         self.close_data_connection()
         self.send_message(LIST_TRANSFER_DONE)
 
     def handle_CWD_command(self, args):
         # self.authenticate_user()
-        self.validate_arg(args[1])
-        target_dir = self.remove_command_signs(args[1])
-        if not target_dir:
+        target_dir = None
+        if len(args) > 1:
+            self.validate_arg(args[1])
+            target_dir = self.remove_command_signs(args[1])
+        if target_dir is None:
             self.go_to_base_path()
         elif target_dir == '..':
             self.go_to_prev_path()

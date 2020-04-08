@@ -93,7 +93,7 @@ class Client_handler:
         file_name = self.remove_command_signs(arg)
         self.check_for_not_existing_file_or_dir(file_name)
         os.remove(self.get_base_path() + file_name)
-        self.send_message('257 <' + file_name + '> deleted.')
+        self.send_message('250 <' + file_name + '> deleted.')
 
     def validate_remove_dir_option(self, option):
         if option != '-f':
@@ -105,7 +105,7 @@ class Client_handler:
         dir_name = self.remove_command_signs(arg)
         self.check_for_not_existing_file_or_dir(dir_name)
         shutil.rmtree(self.get_base_path() + dir_name)
-        self.send_message('257 <' + dir_name + '> deleted.')
+        self.send_message('250 <' + dir_name + '> deleted.')
 
     def initiate_data_connection(self, data_port):
         self.data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

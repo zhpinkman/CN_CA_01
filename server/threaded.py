@@ -23,19 +23,21 @@ def threaded(client_handler):
                 client_handler.handle_USER_command(parsed_data)
             elif command == 'PASS':
                 client_handler.handle_PASS_command(parsed_data)
-            elif client_handler.authenticate_user():
-                if command == 'PWD':
-                    client_handler.handle_PWD_command()
-                elif command == 'MKD':
-                    client_handler.handle_MKD_command(parsed_data)
-                elif command == 'RMD':
-                    client_handler.handle_RMD_command(parsed_data)
-                elif command == 'LIST':
-                    client_handler.handle_LIST_command(parsed_data)
-                elif command == 'CWD':
-                    client_handler.handle_CWD_command(parsed_data)
-                else:
-                    raise Error(UNKNOWN_COMMAND)
+            client_handler.authenticate_user()
+            if command == 'PWD':
+                client_handler.handle_PWD_command()
+            elif command == 'MKD':
+                client_handler.handle_MKD_command(parsed_data)
+            elif command == 'RMD':
+                client_handler.handle_RMD_command(parsed_data)
+            elif command == 'LIST':
+                client_handler.handle_LIST_command(parsed_data)
+            elif command == 'CWD':
+                client_handler.handle_CWD_command(parsed_data)
+            elif command == 'QUIT':
+                client_handler.handle_QUIT_command()
+            else:
+                raise Error(UNKNOWN_COMMAND)
 
         except Error as e:
             client_handler.send_message(e.message)

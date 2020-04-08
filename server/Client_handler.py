@@ -5,6 +5,7 @@ from File_handler import File_handler
 from defines import *
 from Utils import Utils
 from Error import Error
+from Socket_handler import Socket_handler
 
 
 class Client_handler:
@@ -207,3 +208,13 @@ class Client_handler:
         self.user = None
         self.logged_in = False
         self.send_message(QUIT_OK)
+
+    def handle_DL_command(self, args):
+        if len(args) != 2:
+            raise Error(SYNTAX_ERROR)
+        else:
+            self.validate_arg(args[1])
+            file_name = self.remove_command_signs(args[1])
+            file_path = self.curr_dir + "/" + file_name
+            Socket_handler.upload_file(file_path, Utils().get_data_channel_port())
+            self.send_message(SUCCESSFUL_DOWNLOAD)

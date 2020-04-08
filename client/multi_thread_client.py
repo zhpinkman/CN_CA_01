@@ -1,8 +1,11 @@
 # Import socket module
+import logging
 import socket
 import pickle
 import sys
 import select
+import traceback
+
 from Utils import Utils
 
 
@@ -51,12 +54,26 @@ def main():
                     server_socket, server_addr = sock.accept()
                     socket_lists.append(server_socket)
                 else:
-                    data_recvd = sock.recv(1024)
-                    print(pickle.loads(data_recvd))
+                    # data_recvd = sock.recv(1024)
+                    # print(pickle.loads(data_recvd))
+                    # socket_lists.remove(sock)
+                    # sock.close()
+                    data = []
+                    while True:
+                        packet = sock.recv(1024)
+                        if not packet:
+                            break
+                        data.append(packet)
+                    try:
+                        data_arr = pickle.loads(b"".join(data))
+                        print(data_arr)
+                    except Exception:
+                        pass
                     socket_lists.remove(sock)
                     sock.close()
 
-        except:
+        except Exception as e:
+            logging.error(traceback.format_exc())
             print("Exiting")
             break
 

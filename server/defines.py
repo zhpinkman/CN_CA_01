@@ -1,4 +1,5 @@
 CONFIG_PATH = '../config.json'
+IP = "127.0.0.1"
 
 BAD_SEQUENCE_OF_COMMANDS = '503 Bad sequence of commands.'
 INVALID_USERNAME_PASSWORD = '403 Invalid username or password.'
@@ -14,3 +15,4 @@ UNKNOWN_COMMAND = '500 Unknown command.'
 LIST_TRANSFER_DONE = '226 List transfer done.'
 CWD_SUCCESS = '250 Successful Change.'
 QUIT_OK = '221 Successful Quit.'
+SUCCESSFUL_DOWNLOAD = "‫‪226‬‬ ‫‪Successful‬‬ ‫‪Download.‬‬"

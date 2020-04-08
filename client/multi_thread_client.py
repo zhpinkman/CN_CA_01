@@ -30,33 +30,39 @@ def main():
 
     while True:
 
-        read_sockets, write_sockets, error_sockets = select.select(socket_lists, [], [])
+        try:
+            read_sockets, write_sockets, error_sockets = select.select(socket_lists, [], [])
 
-        for sock in read_sockets:
-            if sock is sys.stdin:
-                data = sys.stdin.readline()
-                if not data:
-                    command_socket.close()
-                    data_socket.close()
-                    return
-                elif data == 'LIST\n':
-                    command_socket.send(('LIST ' + str(data_port)).encode())
+            for sock in read_sockets:
+                if sock is sys.stdin:
+                    data = sys.stdin.readline()
+                    if not data:
+                        command_socket.close()
+                        data_socket.close()
+                        return
+                    elif data == 'LIST\n':
+                        command_socket.send(('LIST ' + str(data_port)).encode())
+                    else:
+                        command_socket.send(data.encode())
+                elif sock is command_socket:
+                    data = sock.recv(1024)
+                    print(data.decode())
+                elif sock is data_socket:
+                    server_socket, server_addr = sock.accept()
+                    socket_lists.append(server_socket)
                 else:
-                    command_socket.send(data.encode())
-            elif sock is command_socket:
-                data = sock.recv(1024)
-                print(data.decode())
-            elif sock is data_socket:
-                server_socket, server_addr = sock.accept()
-                socket_lists.append(server_socket)
-            else:
-                data_recvd = sock.recv(1024)
-                print(pickle.loads(data_recvd))
-                socket_lists.remove(sock)
-                sock.close()
+                    data_recvd = sock.recv(1024)
+                    print(pickle.loads(data_recvd))
+                    socket_lists.remove(sock)
+                    sock.close()
+
+        except:
+            print("Exiting")
+            break
 
     # close the connection
     command_socket.close()
+    data_socket.close()
 
 
 if __name__ == '__main__':

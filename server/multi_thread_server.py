@@ -25,14 +25,20 @@ def main():
     # a forever loop until client wants to exit
     while True:
         # establish connection with client
-        c, addr = s.accept()
+        try:
+            c, addr = s.accept()
 
-        # lock acquired by client
-        # print_lock.acquire()
-        print('Connected to :', addr[0], ':', addr[1])
+            # lock acquired by client
+            # print_lock.acquire()
+            print('Connected to :', addr[0], ':', addr[1])
 
-        # Start a new thread and return its identifier
-        start_new_thread(threaded, (Client_handler(c),))
+            # Start a new thread and return its identifier
+            start_new_thread(threaded, (Client_handler(c),))
+        except:
+            print("Exiting")
+            break
+
+    print("Closing socket")
     s.close()
 
 

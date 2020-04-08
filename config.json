@@ -1,6 +1,6 @@
 {
-  "commandChannelPort": 8011,
-  "dataChannelPort":8012,
+  "commandChannelPort": 8018,
+  "dataChannelPort":8010,
   "users": [
     {
       "user": "navid",

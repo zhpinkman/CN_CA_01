@@ -35,3 +35,9 @@ class Utils:
 
     def get_command(self, data):
         return data[0]
+
+    def get_command_channel_port(self):
+        return config_data["commandChannelPort"]
+
+    def get_data_channel_port(self):
+        return config_data["dataChannelPort"]

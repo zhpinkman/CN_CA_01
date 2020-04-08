@@ -13,7 +13,7 @@ def main():
     # reverse a port on your computer
     # in our case it is 12345 but it
     # can be anything
-    port = 12345
+    port = Utils().get_command_channel_port()
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(('', port))
     print("socket binded to port", port)

@@ -3,6 +3,7 @@ import socket
 import pickle
 import sys
 import select
+from Utils import Utils
 
 
 def main():
@@ -10,9 +11,8 @@ def main():
     host = '127.0.0.1'
 
     # Define the port on which you want to connect
-    port = 12345
-
-    data_port = 65432
+    port = Utils().get_command_channel_port()
+    data_port = Utils().get_data_channel_port()
 
     command_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,7 +40,7 @@ def main():
                     data_socket.close()
                     return
                 elif data == 'LIST\n':
-                    command_socket.send('LIST 65432'.encode())
+                    command_socket.send(('LIST ' + str(data_port)).encode())
                 else:
                     command_socket.send(data.encode())
             elif sock is command_socket:
@@ -55,10 +55,10 @@ def main():
                 socket_lists.remove(sock)
                 sock.close()
 
-
     # close the connection
     command_socket.close()
 
 
 if __name__ == '__main__':
+    Utils().read_config_file()
     main()

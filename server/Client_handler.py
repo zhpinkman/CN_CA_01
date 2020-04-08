@@ -14,7 +14,7 @@ class Client_handler:
     def __init__(self, client):
         self.base_dir = os.getcwd()
         self.curr_dir = self.base_dir
-        self.logged_in = True
+        self.logged_in = False
         self.username = None
         self.user = None
         self.client = client
@@ -36,7 +36,7 @@ class Client_handler:
         if self.username:
             raise Error(BAD_SEQUENCE_OF_COMMANDS)
 
-    def get_neat_data(self, arg):
+    def remove_command_signs(self, arg):
         return arg[1:len(arg) - 1]
 
     def send_message(self, message):
@@ -56,6 +56,7 @@ class Client_handler:
     def authenticate_user(self):
         if not self.logged_in:
             raise Error(NOT_AUTHORIZED)
+        return True
 
     def get_base_path(self):
         return Utils().get_diff_path(self.base_dir, self.curr_dir)
@@ -66,7 +67,7 @@ class Client_handler:
 
     def make_dir(self, arg):
         self.validate_arg(arg)
-        dir_name = self.get_neat_data(arg)
+        dir_name = self.remove_command_signs(arg)
         self.check_for_existing_file_or_dir(dir_name)
         os.mkdir(self.get_base_path() + dir_name)
         self.send_message('257 <' + dir_name + '> created.')
@@ -78,7 +79,7 @@ class Client_handler:
 
     def make_file(self, arg):
         self.validate_arg(arg)
-        file_name = self.get_neat_data(arg)
+        file_name = self.remove_command_signs(arg)
         self.check_for_existing_file_or_dir(file_name)
         open(self.get_base_path() + file_name, 'w+').close()
         self.send_message('257 <' + file_name + '> created.')
@@ -89,7 +90,7 @@ class Client_handler:
 
     def remove_file(self, arg):
         self.validate_arg(arg)
-        file_name = self.get_neat_data(arg)
+        file_name = self.remove_command_signs(arg)
         self.check_for_not_existing_file_or_dir(file_name)
         os.remove(self.get_base_path() + file_name)
         self.send_message('257 <' + file_name + '> deleted.')
@@ -101,7 +102,7 @@ class Client_handler:
 
     def remove_dir(self, arg):
         self.validate_arg(arg)
-        dir_name = self.get_neat_data(arg)
+        dir_name = self.remove_command_signs(arg)
         self.check_for_not_existing_file_or_dir(dir_name)
         shutil.rmtree(self.get_base_path() + dir_name)
         self.send_message('257 <' + dir_name + '> deleted.')
@@ -146,7 +147,7 @@ class Client_handler:
     def handle_USER_command(self, arg):
         self.check_for_previous_username()
         self.validate_arg(arg[1])
-        username = self.get_neat_data(arg[1])
+        username = self.remove_command_signs(arg[1])
         self.user = Utils().find_user(username)
         self.username = self.user['user']
         self.send_message(USERNAME_OK)
@@ -154,31 +155,31 @@ class Client_handler:
     def handle_PASS_command(self, arg):
         self.check_for_existing_username()
         self.validate_arg(arg[1])
-        password = self.get_neat_data(arg[1])
+        password = self.remove_command_signs(arg[1])
         self.validate_password(password)
         self.logged_in = True
         self.send_message(LOGIN_OK)
 
     def handle_PWD_command(self):
-        self.authenticate_user()
+        # self.authenticate_user()
         self.send_message('257 <' + self.curr_dir + '>')
 
     def handle_MKD_command(self, args):
-        self.authenticate_user()
+        # self.authenticate_user()
         if len(args) == 2:
             self.make_dir(args[1])
         elif len(args) == 3 and self.validate_create_file_option(args[1]):
             self.make_file(args[2])
 
     def handle_RMD_command(self, args):
-        self.authenticate_user()
+        # self.authenticate_user()
         if len(args) == 2:
             self.remove_file(args[1])
         elif len(args) == 3 and self.validate_remove_dir_option(args[1]):
             self.remove_dir(args[2])
 
     def handle_LIST_command(self, args):
-        self.authenticate_user()
+        # self.authenticate_user()
         client_data_port = int(args[1])
         self.initiate_data_connection(client_data_port)
         base_path = self.get_base_path()
@@ -188,9 +189,9 @@ class Client_handler:
         self.send_message(LIST_TRANSFER_DONE)
 
     def handle_CWD_command(self, args):
-        self.authenticate_user()
+        # self.authenticate_user()
         self.validate_arg(args[1])
-        target_dir = self.get_neat_data(args[1])
+        target_dir = self.remove_command_signs(args[1])
         if not target_dir:
             self.go_to_base_path()
         elif target_dir == '..':

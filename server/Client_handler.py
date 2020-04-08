@@ -92,8 +92,11 @@ class Client_handler:
         self.validate_arg(arg)
         file_name = self.remove_command_signs(arg)
         self.check_for_not_existing_file_or_dir(file_name)
-        os.remove(self.get_base_path() + file_name)
-        self.send_message('250 <' + file_name + '> deleted.')
+        try:
+            os.remove(self.get_base_path() + file_name)
+            self.send_message('250 <' + file_name + '> deleted.')
+        except:
+            raise Error(FILE_NOT_EXISTED)
 
     def validate_remove_dir_option(self, option):
         if option != '-f':
@@ -104,8 +107,11 @@ class Client_handler:
         self.validate_arg(arg)
         dir_name = self.remove_command_signs(arg)
         self.check_for_not_existing_file_or_dir(dir_name)
-        shutil.rmtree(self.get_base_path() + dir_name)
-        self.send_message('250 <' + dir_name + '> deleted.')
+        try:
+            shutil.rmtree(self.get_base_path() + dir_name)
+            self.send_message('250 <' + dir_name + '> deleted.')
+        except:
+            raise Error(FILE_NOT_EXISTED)
 
     def initiate_data_connection(self, data_port):
         self.data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

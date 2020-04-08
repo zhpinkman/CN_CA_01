@@ -1,2 +1,6 @@
 USER <navid>
 PASS <1234>
+MKD <d>
+RMD <d>
+MKD -i <d>
+RMD -f <d>

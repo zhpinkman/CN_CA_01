@@ -198,10 +198,10 @@ class Client_handler:
             self.go_to_prev_path()
         else:
             self.go_to_path(target_dir)
+
     def handle_QUIT_command(self):
         # self.authenticate_user()
         self.username = None
         self.user = None
         self.logged_in = False
         self.send_message(QUIT_OK)
-

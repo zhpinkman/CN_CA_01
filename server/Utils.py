@@ -34,7 +34,10 @@ class Utils:
         return list(map(str, data.split()))
 
     def get_command(self, data):
-        return data[0]
+        try:
+            return data[0]
+        except:
+            return ""
 
     def get_command_channel_port(self):
         return config_data["commandChannelPort"]

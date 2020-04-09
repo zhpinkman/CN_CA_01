@@ -1,6 +1,8 @@
 import socket
 import os
 import shutil
+import struct
+
 from File_handler import File_handler
 from defines import *
 from Utils import Utils
@@ -117,6 +119,10 @@ class Client_handler:
     def initiate_data_connection(self, data_port):
         self.data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_socket.connect(('127.0.0.1', data_port))
+        l_onoff = 1
+        l_linger = 10
+        self.data_socket.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER,
+                                    struct.pack('ii', l_onoff, l_linger))
 
     def close_data_connection(self):
         self.data_socket.close()

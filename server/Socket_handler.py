@@ -1,8 +1,10 @@
 import pickle
+import struct
 
 from defines import *
 import socket
 from Error import Error
+
 
 class Socket_handler:
 
@@ -35,5 +37,9 @@ class Socket_handler:
     @staticmethod
     def initiate_data_connection(data_port):
         data_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        l_onoff = 1
+        l_linger = 10
+        data_socket.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER,
+                               struct.pack('ii', l_onoff, l_linger))
         data_socket.connect((IP, data_port))
         return data_socket

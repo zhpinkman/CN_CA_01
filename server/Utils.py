@@ -72,3 +72,6 @@ class Utils:
 
     def get_logging(self):
         return config_data["logging"]
+
+    def get_authorization(self):
+        return config_data["authorization"]

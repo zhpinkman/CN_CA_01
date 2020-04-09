@@ -24,6 +24,7 @@ class Client_handler:
         self.user = None
         self.client = client
         self.data_socket = None
+        Accounting_handler.can_access("a", "b")
 
     def validate_arg(self, arg):
         if arg[0] != '<' or arg[len(arg) - 1] != '>':
@@ -226,7 +227,6 @@ class Client_handler:
         self.user = None
         self.logged_in = False
         self.send_message(QUIT_OK)
-
 
     def handle_DL_command(self, args):
         if len(args) != 2:

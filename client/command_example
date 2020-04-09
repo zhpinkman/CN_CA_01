@@ -1,8 +1,10 @@
 USER <navid>
 PASS <1234>
+CWD <files>
+DL <test.txt>
+
 MKD <d>
 RMD <d>
 MKD -i <d>
 RMD -f <d>
 DL <defines.py>
-DL <Client_handler.py>

@@ -29,7 +29,7 @@ tn.write('data\n'.encode())
 tn.read_until('354 End data with <CR><LF>.<CR><LF>'.encode())
 
 
-tn.write(('Subject: Test email' + '\n' + 'Hi, This is a test message.Regards,Me' + '\n' + '.' + "\n").encode())
+tn.write(('Subject: Test email' + '\n' + 'Hi, This is a test.txt message.Regards,Me' + '\n' + '.' + "\n").encode())
 
 
 tn.read_until('250 2.0.0 Ok:'.encode())

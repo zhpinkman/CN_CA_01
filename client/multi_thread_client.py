@@ -30,13 +30,14 @@ def main():
 
     # message you send to server
     print("starting mail server")
-
+    global data_channel_content, download_file_name
+    data_channel_content = None
     while True:
-
         try:
             read_sockets, write_sockets, error_sockets = select.select(socket_lists, [], [])
 
             for sock in read_sockets:
+
                 if sock is sys.stdin:
                     data = sys.stdin.readline()
                     if not data:
@@ -46,13 +47,25 @@ def main():
                     elif data == 'LIST\n':
                         command_socket.send(('LIST ' + str(data_port)).encode())
                     else:
+                        if "DL" in data:
+                            download_file_name = data[4:-2]
                         command_socket.send(data.encode())
+
                 elif sock is command_socket:
                     data = sock.recv(1024)
-                    print(data.decode())
+                    response = data.decode()
+                    print(response)
+                    if response == "226 List transfer done.":
+                        print(data_channel_content)
+                        data_channel_content = None
+                    elif response == "‫‪226‬‬ ‫‪Successful‬‬ ‫‪Download.‬‬":
+                        write_to_file(data_channel_content)
+                        data_channel_content = None
+
                 elif sock is data_socket:
                     server_socket, server_addr = sock.accept()
                     socket_lists.append(server_socket)
+
                 else:
                     # data_recvd = sock.recv(1024)
                     # print(pickle.loads(data_recvd))
@@ -65,14 +78,16 @@ def main():
                             break
                         data.append(packet)
                     try:
-                        data_arr = pickle.loads(b"".join(data))
-                        print(data_arr)
+                        # print(data)
+                        # print(b"".join(data))
+                        data_channel_content = pickle.loads(b"".join(data))
+                        print(data_channel_content)
                     except Exception:
                         pass
                     socket_lists.remove(sock)
                     sock.close()
 
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
             print("Exiting")
             break
@@ -80,6 +95,13 @@ def main():
     # close the connection
     command_socket.close()
     data_socket.close()
+
+
+def write_to_file(data):
+    print("Writing to file")
+    f = open(download_file_name, "wb")
+    f.write(data)
+    f.close()
 
 
 if __name__ == '__main__':

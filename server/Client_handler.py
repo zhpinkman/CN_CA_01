@@ -230,6 +230,7 @@ class Client_handler:
         self.username = None
         self.user = None
         self.logged_in = False
+        self.curr_dir = self.base_dir
         self.send_message(QUIT_OK)
 
     def handle_DL_command(self, args):

@@ -16,6 +16,7 @@ LIST_TRANSFER_DONE = '226 List transfer done.'
 CWD_SUCCESS = '250 Successful Change.'
 QUIT_OK = '221 Successful Quit.'
 SUCCESSFUL_DOWNLOAD = "‫‪226‬‬ ‫‪Successful‬‬ ‫‪Download.‬‬"
+DOWNLOAD_LIMIT_EXCEEDED = "‫‪425‬‬ ‫‪Can't‬‬ ‫‪open‬‬ ‫‪data‬‬ ‫‪connection.‬‬"
 
 
 HELP_TEXT = "214\n" + \

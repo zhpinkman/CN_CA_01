@@ -44,3 +44,17 @@ class Utils:
 
     def get_data_channel_port(self):
         return config_data["dataChannelPort"]
+
+    def get_users_accounting(self):
+        return config_data["accounting"]["users"]
+
+    def find_user_by_username(self, users, username):
+        for user in users:
+            if user['user'] == username:
+                return user
+        raise Error(INVALID_USERNAME_PASSWORD)
+
+    def get_user_download_limit(self, username):
+        users = self.get_users_accounting()
+        user = self.find_user_by_username(users, username)
+        return user["size"]

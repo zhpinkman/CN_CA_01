@@ -3,6 +3,7 @@ from _thread import *
 from threaded import threaded
 from Client_handler import Client_handler
 from Utils import Utils
+from Accounting_handler import Accounting_handler
 
 config_data = None
 
@@ -44,4 +45,5 @@ def main():
 
 if __name__ == '__main__':
     Utils().read_config_file()
+    Accounting_handler().start()
     main()

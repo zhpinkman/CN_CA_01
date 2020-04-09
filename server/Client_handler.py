@@ -222,9 +222,9 @@ class Client_handler:
             self.validate_arg(args[1])
             file_name = self.remove_command_signs(args[1])
             file_path = self.curr_dir + "/" + file_name
-            Accounting_handler().is_user_eligible_to_download(file_path, self.username)
-            Socket_handler.upload_file(file_path, Utils().get_data_channel_port())
-            self.send_message(SUCCESSFUL_DOWNLOAD)
+            if Accounting_handler().is_user_eligible_to_download(file_path, self.username):
+                Socket_handler.upload_file(file_path, Utils().get_data_channel_port())
+                self.send_message(SUCCESSFUL_DOWNLOAD)
 
     def handle_HELP_command(self):
         self.send_message(HELP_TEXT)

@@ -1,7 +1,8 @@
-USER <navid>
+USER <mohsen>
 PASS <1234>
 CWD <files>
 DL <test.txt>
+DL <939.txt>
 
 MKD <d>
 RMD <d>

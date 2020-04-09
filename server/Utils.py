@@ -59,5 +59,13 @@ class Utils:
         user = self.find_user_by_username(users, username)
         return user["size"]
 
+    def get_user_email_alert(self, username):
+        users = self.get_users_accounting()
+        user = self.find_user_by_username(users, username)
+        return user["email"], user["alert"]
+
     def is_accounting_enabled(self):
         return config_data["accounting"]["enable"]
+
+    def get_threshold(self):
+        return config_data["accounting"]["threshold"]

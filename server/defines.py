@@ -19,6 +19,9 @@ SUCCESSFUL_DOWNLOAD = "‫‪226‬‬ ‫‪Successful‬‬ ‫‪Download.‬
 DOWNLOAD_LIMIT_EXCEEDED = "‫‪425‬‬ ‫‪Can't‬‬ ‫‪open‬‬ ‫‪data‬‬ ‫‪connection.‬‬"
 
 
+THRESHOLD_SUBJECT = "MZ FTP Threshold Alert"
+THRESHOLD_BODY = "You're in trouble!"
+
 HELP_TEXT = "214\n" + \
             "USER [name], Its argument is used to specify the user's string. It is used for user authentication.\n" + \
             "PASS [password], Its argument is used to specify the user's password. It is used for user authentication.\n" + \

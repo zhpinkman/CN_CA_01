@@ -19,13 +19,16 @@ class Socket_handler:
             data_socket.close()
             raise Error(FILE_NOT_EXISTED)
 
-        chunk = f.read(1024)
-        counter = 0
-        while chunk:
-            counter += 1
-            print("Sending chunk " + str(counter))
-            data_socket.send(pickle.dumps(chunk))
-            chunk = f.read(1024)
+        chunk = f.read()
+        data_socket.send(pickle.dumps(chunk))
+
+        # chunk = f.read(1024)
+        # counter = 0
+        # while chunk:
+        #     counter += 1
+        #     print("Sending chunk " + str(counter))
+        #     data_socket.send(pickle.dumps(chunk))
+        #     chunk = f.read(1024)
 
         data_socket.close()
 

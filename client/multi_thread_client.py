@@ -78,10 +78,8 @@ def main():
                             break
                         data.append(packet)
                     try:
-                        # print(data)
-                        # print(b"".join(data))
                         data_channel_content = pickle.loads(b"".join(data))
-                        print(data_channel_content)
+                        # print(data_channel_content)
                     except Exception:
                         pass
                     socket_lists.remove(sock)

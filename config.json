@@ -1,6 +1,6 @@
 {
-  "commandChannelPort": 8000,
-  "dataChannelPort":8001,
+  "commandChannelPort": 8003,
+  "dataChannelPort":8005,
   "users": [
     {
       "user": "navid",

@@ -3,21 +3,33 @@ import traceback
 from socket import *
 import base64
 import time
+import ssl
 
 
 class Mail_sender:
-    # def __init__(self, to_email, subject, body):
-    #     self.to_email = to_email
-    #     self.subject = subject
-    #     self.body = body
+
+    def __init__(self, to_email, subject, body, using_ssl):
+        self.to_email = to_email
+        self.subject = subject
+        self.body = body
+        self.using_ssl = using_ssl
+
+    def get_normal_socket(self):
+        return socket(AF_INET, SOCK_STREAM)
+
+    def get_ssl_socket(self):
+        return ssl.wrap_socket(socket(AF_INET, SOCK_STREAM))
 
     def send(self):
         try:
-            msg = "\r\n fuck this shit"
+            msg = "\r\n" + self.body
             endmsg = "\r\n.\r\n"
             mailserver = ("mail.ut.ac.ir", 25)
 
-            clientSocket = socket(AF_INET, SOCK_STREAM)
+            if self.using_ssl:
+                clientSocket = self.get_ssl_socket()
+            else:
+                clientSocket = self.get_normal_socket()
 
             clientSocket.connect(mailserver)
 
@@ -51,7 +63,7 @@ class Mail_sender:
             received_message = clientSocket.recv(1024).decode()
 
             # print("After MAIL FROM command: " + received_message)
-            rcptTo = "RCPT TO:<zh.sourati@ut.ac.ir>\r\n"
+            rcptTo = "RCPT TO:<" + self.to_email + ">\r\n"
             clientSocket.send(rcptTo.encode())
 
             # print("After RCPT TO command: " + received_message)
@@ -61,7 +73,7 @@ class Mail_sender:
             received_message = clientSocket.recv(1024).decode()
 
             # print("After DATA command: " + received_message)
-            subject = "Subject: testing my client\r\n\r\n"
+            subject = "Subject: " + self.subject + "\r\n\r\n"
             clientSocket.send(subject.encode())
             date = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
             date = date + "\r\n\r\n"
@@ -83,4 +95,4 @@ class Mail_sender:
 
 
 
-Mail_sender().send()
+Mail_sender("zh.sourati@ut.ac.ir", "testing mail sender module", "another message is going to change your life.", False).send()

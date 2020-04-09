@@ -1,6 +1,6 @@
 {
-  "commandChannelPort": 8000,
-  "dataChannelPort":8001,
+  "commandChannelPort": 8001,
+  "dataChannelPort":8002,
   "users": [
     {
       "user": "navid",
@@ -12,7 +12,7 @@
     }
   ],
   "accounting": {
-    "enable": true,
+    "enable": false,
     "threshold": 100,
     "users": [
       {

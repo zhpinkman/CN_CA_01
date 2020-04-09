@@ -58,3 +58,6 @@ class Utils:
         users = self.get_users_accounting()
         user = self.find_user_by_username(users, username)
         return user["size"]
+
+    def is_accounting_enabled(self):
+        return config_data["accounting"]["enable"]

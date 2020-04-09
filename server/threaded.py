@@ -1,7 +1,7 @@
 from defines import *
 from Utils import Utils
 from Error import Error
-
+from Logger import Logger
 
 # thread function
 def threaded(client_handler):
@@ -20,10 +20,13 @@ def threaded(client_handler):
 
         try:
             if command == 'USER':
+                Logger.log("USER")
                 client_handler.handle_USER_command(parsed_data)
             elif command == 'PASS':
+                Logger.log("PASS")
                 client_handler.handle_PASS_command(parsed_data)
             elif command == "HELP":
+                Logger.log("HELP")
                 client_handler.handle_HELP_command()
 
             elif client_handler.authenticate_user():

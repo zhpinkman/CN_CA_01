@@ -69,3 +69,6 @@ class Utils:
 
     def get_threshold(self):
         return config_data["accounting"]["threshold"]
+
+    def get_logging(self):
+        return config_data["logging"]

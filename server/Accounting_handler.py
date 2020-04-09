@@ -4,7 +4,7 @@ from Utils import Utils
 from Error import Error
 from defines import *
 from Mail_sender import Mail_sender
-
+from Logger import Logger
 
 class Accounting_handler:
 
@@ -30,12 +30,16 @@ class Accounting_handler:
             users_download_volume[username] += file_size
             print(username, "download volume:", users_download_volume[username], "/",
                   Utils().get_user_download_limit(username))
+
+            Logger.log(username + " download volume has changed: " + str(users_download_volume[username]) + "/" + str(Utils().get_user_download_limit(username)))
             return True
         else:
             print(username, "download volume:", users_download_volume[username], "/",
                   Utils().get_user_download_limit(username))
             print("file size:", file_size)
             print(users_download_volume[username] + file_size, " exceeds ", Utils().get_user_download_limit(username))
+            Logger.log(username + " current download volume: " + str(users_download_volume[username]) + "/" + str(Utils().get_user_download_limit(username)))
+            Logger.log(username + " can't download " + file_path + " because file size is " + str(file_size))
             raise Error(DOWNLOAD_LIMIT_EXCEEDED)
 
     def alert_user_if_needed(self, limit, username, file_size):
@@ -44,4 +48,5 @@ class Accounting_handler:
                 email, alert = Utils().get_user_email_alert(username)
                 if alert:
                     print("Alerting", username, "at", email)
+                    Logger.log(username + " is being alerted via email about going under remaining download volume threshold")
                     Mail_sender(email, THRESHOLD_SUBJECT, THRESHOLD_BODY).send()

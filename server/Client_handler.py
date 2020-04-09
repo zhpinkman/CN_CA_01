@@ -9,6 +9,8 @@ from Utils import Utils
 from Error import Error
 from Socket_handler import Socket_handler
 from Accounting_handler import Accounting_handler
+from Logger import Logger
+
 
 class Client_handler:
 
@@ -74,6 +76,7 @@ class Client_handler:
         self.check_for_existing_file_or_dir(dir_name)
         os.mkdir(self.get_base_path() + dir_name)
         self.send_message('257 <' + dir_name + '> created.')
+        Logger.log(self.username + " created " + dir_name + " directory")
 
     def validate_create_file_option(self, option):
         if option != '-i':
@@ -86,6 +89,7 @@ class Client_handler:
         self.check_for_existing_file_or_dir(file_name)
         open(self.get_base_path() + file_name, 'w+').close()
         self.send_message('257 <' + file_name + '> created.')
+        Logger.log(self.username + " created " + file_name + " file")
 
     def check_for_not_existing_file_or_dir(self, name):
         if not os.path.exists(self.get_base_path() + name):
@@ -98,6 +102,7 @@ class Client_handler:
         try:
             os.remove(self.get_base_path() + file_name)
             self.send_message('250 <' + file_name + '> deleted.')
+            Logger.log(self.username + " removed " + file_name + " file")
         except:
             raise Error(FILE_NOT_EXISTED)
 
@@ -113,6 +118,7 @@ class Client_handler:
         try:
             shutil.rmtree(self.get_base_path() + dir_name)
             self.send_message('250 <' + dir_name + '> deleted.')
+            Logger.log(self.username + " removed " + dir_name + " directory")
         except:
             raise Error(FILE_NOT_EXISTED)
 
@@ -166,10 +172,12 @@ class Client_handler:
         self.validate_password(password)
         self.logged_in = True
         self.send_message(LOGIN_OK)
+        Logger.log(self.username + " signed in")
 
     def handle_PWD_command(self):
         # self.authenticate_user()
         self.send_message('257 <' + self.curr_dir + '>')
+        Logger.log(self.username + " used PWD")
 
     def handle_MKD_command(self, args):
         # self.authenticate_user()
@@ -194,6 +202,7 @@ class Client_handler:
         self.send_data(file_list)
         self.close_data_connection()
         self.send_message(LIST_TRANSFER_DONE)
+        Logger.log(self.username + " received " + base_path + "LIST")
 
     def handle_CWD_command(self, args):
         # self.authenticate_user()
@@ -208,12 +217,16 @@ class Client_handler:
         else:
             self.go_to_path(target_dir)
 
+        Logger.log(self.username + " CWD to " + self.curr_dir)
+
     def handle_QUIT_command(self):
         # self.authenticate_user()
+        Logger.log(self.username + " QUIT")
         self.username = None
         self.user = None
         self.logged_in = False
         self.send_message(QUIT_OK)
+
 
     def handle_DL_command(self, args):
         if len(args) != 2:
@@ -222,9 +235,11 @@ class Client_handler:
             self.validate_arg(args[1])
             file_name = self.remove_command_signs(args[1])
             file_path = self.curr_dir + "/" + file_name
+            Logger.log(self.username + " requested DL " + file_path)
             if Accounting_handler().is_user_eligible_to_download(file_path, self.username):
                 Socket_handler.upload_file(file_path, Utils().get_data_channel_port())
                 self.send_message(SUCCESSFUL_DOWNLOAD)
+                Logger.log(self.username + " downloaded " + file_path)
 
     def handle_HELP_command(self):
         self.send_message(HELP_TEXT)

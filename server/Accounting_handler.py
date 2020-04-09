@@ -6,6 +6,7 @@ from defines import *
 from Mail_sender import Mail_sender
 from Logger import Logger
 
+
 class Accounting_handler:
 
     def start(self):
@@ -31,14 +32,16 @@ class Accounting_handler:
             print(username, "download volume:", users_download_volume[username], "/",
                   Utils().get_user_download_limit(username))
 
-            Logger.log(username + " download volume has changed: " + str(users_download_volume[username]) + "/" + str(Utils().get_user_download_limit(username)))
+            Logger.log(username + " download volume has changed: " + str(users_download_volume[username]) + "/" + str(
+                Utils().get_user_download_limit(username)))
             return True
         else:
             print(username, "download volume:", users_download_volume[username], "/",
                   Utils().get_user_download_limit(username))
             print("file size:", file_size)
             print(users_download_volume[username] + file_size, " exceeds ", Utils().get_user_download_limit(username))
-            Logger.log(username + " current download volume: " + str(users_download_volume[username]) + "/" + str(Utils().get_user_download_limit(username)))
+            Logger.log(username + " current download volume: " + str(users_download_volume[username]) + "/" + str(
+                Utils().get_user_download_limit(username)))
             Logger.log(username + " can't download " + file_path + " because file size is " + str(file_size))
             raise Error(DOWNLOAD_LIMIT_EXCEEDED)
 
@@ -48,5 +51,20 @@ class Accounting_handler:
                 email, alert = Utils().get_user_email_alert(username)
                 if alert:
                     print("Alerting", username, "at", email)
-                    Logger.log(username + " is being alerted via email about going under remaining download volume threshold")
+                    Logger.log(
+                        username + " is being alerted via email about going under remaining download volume threshold")
                     Mail_sender(email, THRESHOLD_SUBJECT, THRESHOLD_BODY).send()
+
+    @staticmethod
+    def can_access(username, file_path):
+        authentication = Utils().get_authorization()
+        enable = authentication["enable"]
+        admins = authentication["admins"]
+        files = authentication["files"]
+        full_path_files = []
+        for file in files:
+            full_path_files.append(os.getcwd() + file[1:])
+        if enable and username not in admins and file_path in full_path_files:
+            return False
+        else:
+            return True

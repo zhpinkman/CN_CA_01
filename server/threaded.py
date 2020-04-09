@@ -23,6 +23,8 @@ def threaded(client_handler):
                 client_handler.handle_USER_command(parsed_data)
             elif command == 'PASS':
                 client_handler.handle_PASS_command(parsed_data)
+            elif command == "HELP":
+                client_handler.handle_HELP_command()
 
             elif client_handler.authenticate_user():
                 if command == 'PWD':

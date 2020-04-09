@@ -224,3 +224,6 @@ class Client_handler:
             file_path = self.curr_dir + "/" + file_name
             Socket_handler.upload_file(file_path, Utils().get_data_channel_port())
             self.send_message(SUCCESSFUL_DOWNLOAD)
+
+    def handle_HELP_command(self):
+        self.send_message(HELP_TEXT)

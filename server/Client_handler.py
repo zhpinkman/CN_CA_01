@@ -1,3 +1,4 @@
+import pickle
 import socket
 import os
 import shutil
@@ -24,7 +25,6 @@ class Client_handler:
         self.user = None
         self.client = client
         self.data_socket = None
-        Accounting_handler.can_access("a", "b")
 
     def validate_arg(self, arg):
         if arg[0] != '<' or arg[len(arg) - 1] != '>':
@@ -87,6 +87,7 @@ class Client_handler:
     def make_file(self, arg):
         self.validate_arg(arg)
         file_name = self.remove_command_signs(arg)
+        Accounting_handler.can_access(self.username, self.curr_dir + "/" + file_name)
         self.check_for_existing_file_or_dir(file_name)
         open(self.get_base_path() + file_name, 'w+').close()
         self.send_message('257 <' + file_name + '> created.')
@@ -99,6 +100,7 @@ class Client_handler:
     def remove_file(self, arg):
         self.validate_arg(arg)
         file_name = self.remove_command_signs(arg)
+        Accounting_handler.can_access(self.username, self.curr_dir + "/" + file_name)
         self.check_for_not_existing_file_or_dir(file_name)
         try:
             os.remove(self.get_base_path() + file_name)
@@ -200,10 +202,12 @@ class Client_handler:
         self.initiate_data_connection(client_data_port)
         base_path = self.get_base_path()
         file_list = File_handler.get_directory_files_list(base_path)
+        file_list = Accounting_handler.remove_unauthorized_files(file_list, base_path, self.username)
+        file_list = pickle.dumps(", ".join(file_list))
         self.send_data(file_list)
         self.close_data_connection()
         self.send_message(LIST_TRANSFER_DONE)
-        Logger.log(self.username + " received " + base_path + "LIST")
+        Logger.log(self.username + " received " + base_path + " LIST")
 
     def handle_CWD_command(self, args):
         # self.authenticate_user()
@@ -226,6 +230,7 @@ class Client_handler:
         self.username = None
         self.user = None
         self.logged_in = False
+        self.curr_dir = self.base_dir
         self.send_message(QUIT_OK)
 
     def handle_DL_command(self, args):
@@ -236,6 +241,7 @@ class Client_handler:
             file_name = self.remove_command_signs(args[1])
             file_path = self.curr_dir + "/" + file_name
             Logger.log(self.username + " requested DL " + file_path)
+            Accounting_handler.can_access(self.username, file_path)
             if Accounting_handler().is_user_eligible_to_download(file_path, self.username):
                 Socket_handler.upload_file(file_path, Utils().get_data_channel_port())
                 self.send_message(SUCCESSFUL_DOWNLOAD)

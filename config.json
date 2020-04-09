@@ -50,7 +50,8 @@
     ],
     "files": [
       "./config.json",
-      "./example.png"
+      "./example.png",
+      "./files/secret.txt"
     ]
   }
     

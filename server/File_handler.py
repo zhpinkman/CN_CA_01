@@ -10,6 +10,6 @@ class File_handler:
     @staticmethod
     def get_directory_files_list(base_path):
         if not base_path:
-            return pickle.dumps(os.listdir())
+            return os.listdir()
         else:
-            return pickle.dumps(os.listdir(base_path))
+            return os.listdir(base_path)

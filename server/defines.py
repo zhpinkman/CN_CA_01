@@ -17,7 +17,7 @@ CWD_SUCCESS = '250 Successful Change.'
 QUIT_OK = '221 Successful Quit.'
 SUCCESSFUL_DOWNLOAD = "‫‪226‬‬ ‫‪Successful‬‬ ‫‪Download.‬‬"
 DOWNLOAD_LIMIT_EXCEEDED = "‫‪425‬‬ ‫‪Can't‬‬ ‫‪open‬‬ ‫‪data‬‬ ‫‪connection.‬‬"
-
+FILE_UNAVAILABLE = "‫‪550‬‬ ‫‪File‬‬ ‫‪unavailable.‬‬"
 
 THRESHOLD_SUBJECT = "MZ FTP Threshold Alert"
 THRESHOLD_BODY = "You're in trouble!"

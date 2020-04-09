@@ -1,6 +1,15 @@
 USER <mohsen>
 PASS <1234>
 CWD <files>
+LIST
+RMD <secret.txt>
+QUIT
+
+USER <farzad>
+PASS <5678>
+CWD <files>
+LIST
+
 DL <test.txt>
 DL <939.txt>
 

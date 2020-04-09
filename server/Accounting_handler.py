@@ -64,7 +64,21 @@ class Accounting_handler:
         full_path_files = []
         for file in files:
             full_path_files.append(os.getcwd() + file[1:])
+
         if enable and username not in admins and file_path in full_path_files:
+            Logger.log(username + " access blocked to " + file_path)
+            raise Error(FILE_UNAVAILABLE)
             return False
         else:
             return True
+
+    @staticmethod
+    def remove_unauthorized_files(files_list, base_path, username):
+        authorized_files = []
+        for file in files_list:
+            try:
+                Accounting_handler.can_access(username, os.getcwd() + "/" + base_path + file)
+                authorized_files.append(file)
+            except Exception:
+                pass
+        return authorized_files

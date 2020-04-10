@@ -53,7 +53,7 @@ class Accounting_handler:
                     print("Alerting", username, "at", email)
                     Logger.log(
                         username + " is being alerted via email about going under remaining download volume threshold")
-                    Mail_sender(email, THRESHOLD_SUBJECT, THRESHOLD_BODY).send()
+                    Mail_sender(email, THRESHOLD_SUBJECT, THRESHOLD_BODY + " (You have " + str(limit - users_download_volume[username] - file_size) + "B left)", True).send()
 
     @staticmethod
     def can_access(username, file_path):

@@ -8,6 +8,7 @@ QUIT
 USER <farzad>
 PASS <5678>
 CWD <files>
+DL <secret.txt>
 LIST
 
 DL <test.txt>
@@ -18,3 +19,10 @@ RMD <d>
 MKD -i <d>
 RMD -f <d>
 DL <defines.py>
+
+
+# EMAIL SCENARIO:
+USER <mohsen>
+PASS <1234>
+CWD <files>
+DL <939.txt>

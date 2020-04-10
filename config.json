@@ -1,6 +1,6 @@
 {
   "commandChannelPort": 8002,
-  "dataChannelPort":8051,
+  "dataChannelPort":8003,
   "users": [
     {
       "user": "navid",
@@ -34,7 +34,7 @@
       {
         "user": "mohsen",
         "size": "1000",
-        "email": "mohsen.fayyaz77@gmail.com",
+        "email": "mohsen.fayyaz77@ut.ac.ir",
         "alert": true
       }
     ]
